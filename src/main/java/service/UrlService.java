@@ -23,28 +23,36 @@ public class UrlService {
     public UrlResponse createShortUrl(UrlRequest request) {
 
         UrlEntity entity = new UrlEntity();
+
         entity.setOriginalUrl(request.getUrl());
         entity.setShortCode(generateCode());
         entity.setCreatedAt(LocalDateTime.now());
         entity.setClickCount(0);
 
-        // NEW - Expire after 30 days
-        entity.setExpiryDate(LocalDateTime.now().plusDays(30));
+        // CUSTOM EXPIRY
+        Integer expiryDays = request.getExpiryDays();
+
+        // Default expiry = 30 days
+        if (expiryDays == null || expiryDays <= 0) {
+            expiryDays = 30;
+        }
+
+        entity.setExpiryDate(LocalDateTime.now().plusDays(expiryDays));
 
         UrlEntity saved = repository.save(entity);
 
         return mapToResponse(saved);
     }
 
-    // GET ORIGINAL URL (REDIRECT)
+    // REDIRECT
     public UrlResponse getOriginalUrl(String shortCode) {
 
         UrlEntity entity = repository.findByShortCode(shortCode)
                 .orElseThrow(() -> new RuntimeException("Short URL not found"));
 
-        // NEW - Check if URL has expired
+        // Check if URL has expired
         if (entity.getExpiryDate() != null &&
-                entity.getExpiryDate().isBefore(LocalDateTime.now())) {
+                LocalDateTime.now().isAfter(entity.getExpiryDate())) {
 
             throw new RuntimeException("Short URL has expired");
         }
@@ -52,7 +60,9 @@ public class UrlService {
         entity.setClickCount(entity.getClickCount() + 1);
         entity.setLastAccessed(LocalDateTime.now());
 
-        return mapToResponse(repository.save(entity));
+        UrlEntity saved = repository.save(entity);
+
+        return mapToResponse(saved);
     }
 
     // ANALYTICS
@@ -69,7 +79,7 @@ public class UrlService {
         return response;
     }
 
-    // UPDATE URL
+    // UPDATE
     public UrlResponse updateUrl(String shortCode, UrlRequest request) {
 
         UrlEntity entity = repository.findByShortCode(shortCode)
@@ -77,10 +87,12 @@ public class UrlService {
 
         entity.setOriginalUrl(request.getUrl());
 
-        return mapToResponse(repository.save(entity));
+        UrlEntity saved = repository.save(entity);
+
+        return mapToResponse(saved);
     }
 
-    // DELETE URL
+    // DELETE
     public void deleteUrl(String shortCode) {
 
         UrlEntity entity = repository.findByShortCode(shortCode)
@@ -89,10 +101,11 @@ public class UrlService {
         repository.delete(entity);
     }
 
-    // MAPPER
+    // ENTITY -> DTO
     private UrlResponse mapToResponse(UrlEntity entity) {
 
         UrlResponse response = new UrlResponse();
+
         response.setId(entity.getId());
         response.setOriginalUrl(entity.getOriginalUrl());
         response.setShortCode(entity.getShortCode());

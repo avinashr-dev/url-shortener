@@ -16,8 +16,6 @@ public class UrlEntity {
     private LocalDateTime createdAt;
     private Integer clickCount = 0;
     private LocalDateTime lastAccessed;
-
-    // NEW FIELD
     private LocalDateTime expiryDate;
 
     // Getter and Setter for id
