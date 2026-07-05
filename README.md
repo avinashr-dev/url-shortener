@@ -56,3 +56,30 @@ Client → Controller → Service → Repository → PostgreSQL
 ---
 
 ## 📂 Project Structure
+src
+├── controller
+├── service
+├── repository
+├── entity
+├── dto
+├── exception
+└── resources
+
+---
+
+## ⚙️ Prerequisites
+Before running the project, install:
+
+- Java 17
+- Maven
+- PostgreSQL
+- IntelliJ IDEA (Recommended)
+
+---
+
+## 🗄️ Database Configuration
+
+Create PostgreSQL database:
+
+```sql
+CREATE DATABASE url_shortener;
