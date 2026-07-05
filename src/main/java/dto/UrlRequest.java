@@ -3,11 +3,16 @@ package com.avinash.urlshortener.dto;
 public class UrlRequest {
 
     private String url;
-
-    // NEW FIELD
     private Integer expiryDays;
 
-    // Getter and Setter for url
+    public UrlRequest() {
+    }
+
+    public UrlRequest(String url, Integer expiryDays) {
+        this.url = url;
+        this.expiryDays = expiryDays;
+    }
+
     public String getUrl() {
         return url;
     }
@@ -16,7 +21,6 @@ public class UrlRequest {
         this.url = url;
     }
 
-    // Getter and Setter for expiryDays
     public Integer getExpiryDays() {
         return expiryDays;
     }

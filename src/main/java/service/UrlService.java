@@ -19,20 +19,20 @@ public class UrlService {
         this.repository = repository;
     }
 
-    // CREATE URL
+    // CREATE SHORT URL
     public UrlResponse createShortUrl(UrlRequest request) {
 
         UrlEntity entity = new UrlEntity();
 
+        // FIX: use request.getUrl() (NOT getOriginalUrl)
         entity.setOriginalUrl(request.getUrl());
+
         entity.setShortCode(generateCode());
         entity.setCreatedAt(LocalDateTime.now());
         entity.setClickCount(0);
 
-        // CUSTOM EXPIRY
         Integer expiryDays = request.getExpiryDays();
 
-        // Default expiry = 30 days
         if (expiryDays == null || expiryDays <= 0) {
             expiryDays = 30;
         }
@@ -44,16 +44,14 @@ public class UrlService {
         return mapToResponse(saved);
     }
 
-    // REDIRECT
+    // GET ORIGINAL URL + INCREASE CLICK COUNT
     public UrlResponse getOriginalUrl(String shortCode) {
 
         UrlEntity entity = repository.findByShortCode(shortCode)
                 .orElseThrow(() -> new RuntimeException("Short URL not found"));
 
-        // Check if URL has expired
         if (entity.getExpiryDate() != null &&
                 LocalDateTime.now().isAfter(entity.getExpiryDate())) {
-
             throw new RuntimeException("Short URL has expired");
         }
 
@@ -79,7 +77,7 @@ public class UrlService {
         return response;
     }
 
-    // UPDATE
+    // UPDATE URL
     public UrlResponse updateUrl(String shortCode, UrlRequest request) {
 
         UrlEntity entity = repository.findByShortCode(shortCode)
@@ -92,7 +90,7 @@ public class UrlService {
         return mapToResponse(saved);
     }
 
-    // DELETE
+    // DELETE URL
     public void deleteUrl(String shortCode) {
 
         UrlEntity entity = repository.findByShortCode(shortCode)
@@ -101,7 +99,7 @@ public class UrlService {
         repository.delete(entity);
     }
 
-    // ENTITY -> DTO
+    // MAPPER
     private UrlResponse mapToResponse(UrlEntity entity) {
 
         UrlResponse response = new UrlResponse();

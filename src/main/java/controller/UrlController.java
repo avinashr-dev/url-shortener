@@ -17,7 +17,7 @@ public class UrlController {
         this.urlService = urlService;
     }
 
-    // CREATE URL
+    // CREATE SHORT URL
     @PostMapping("/urls")
     public ApiResponse<UrlResponse> createShortUrl(@RequestBody UrlRequest request) {
 
@@ -30,11 +30,16 @@ public class UrlController {
         );
     }
 
-    // REDIRECT
+    // REDIRECT FIXED (IMPORTANT PART)
     @GetMapping("/urls/{shortCode}")
     public ResponseEntity<Void> redirect(@PathVariable String shortCode) {
 
         UrlResponse response = urlService.getOriginalUrl(shortCode);
+
+        // ✅ Safety check to avoid blank page
+        if (response == null || response.getOriginalUrl() == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
 
         return ResponseEntity.status(HttpStatus.FOUND)
                 .header(HttpHeaders.LOCATION, response.getOriginalUrl())
